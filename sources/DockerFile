@@ -1,0 +1,35 @@
+# Declare argument
+ARG CODE_VERSION=latest
+
+# Use nginx as the base image
+FROM nginx:${CODE_VERSION}
+
+# Set the working directory
+WORKDIR /
+
+# Create NGINX new default directory
+RUN mkdir -p /opt/nginx/demo/
+
+# Copy the current directory contents into the container at /app
+ADD ./nginx/default.conf /etc/nginx/conf.d/
+ADD ./nginx/50x.html /opt/nginx/demo/
+ADD ./nginx/index.html /opt/nginx/demo/
+ADD ./cmd/env.sh /opt/
+
+# Make port 80 available to the world outside this container
+EXPOSE 80
+
+# Define environment variable
+ENV PWD HelloWorld123
+
+# Install VIM
+RUN apt-get update
+RUN apt-get install vim -y
+
+# Run commands when the container launches
+# CMD ["sh","/opt/env.sh"]
+
+# Add a label
+LABEL version="2.0" \
+description="This is a demo DockerFile that I am using for DevOps Day 2017@SCB." \
+maintainer="gillesnicolas.baillet@sc.com"

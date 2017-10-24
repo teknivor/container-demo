@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="author" content="Ion Mudreac" />
+  <title>Docker Crash Course</title>
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="stylesheet" href="reveal.js/css/reveal.css"/>
+  <link rel="stylesheet" href="overrides.css"/>
+  <style type="text/css">code{white-space: pre;}</style>
+  <link rel="stylesheet" href="reveal.js/css/theme/white.css" id="theme">
+  <!-- If the query includes 'print-pdf', include the PDF print sheet -->
+  <script>
+    if( window.location.search.match( /print-pdf/gi ) ) {
+      var link = document.createElement( 'link' );
+      link.rel = 'stylesheet';
+      link.type = 'text/css';
+      link.href = 'reveal.js/css/print/pdf.css';
+      document.getElementsByTagName( 'head' )[0].appendChild( link );
+    }
+  </script>
+  <!--[if lt IE 9]>
+  <script src="reveal.js/lib/js/html5shiv.js"></script>
+  <![endif]-->
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+<section>
+    <h1 class="title">Docker Crash Course</h1>
+    <h2 class="author">Ion Mudreac</h2>
+    <h3 class="date">July 2017</h3>
+</section>
+
+<section class="slide level1">
+
+<h4 id="the-origins-of-the-docker-project">The origins of the Docker Project</h4>
+<ul>
+<li>dotCloud was operating a PaaS, using a custom container engine.</li>
+<li>This engine was based on OpenVZ (and later, LXC) and AUFS.</li>
+<li>It started (circa 2008) as a single Python script.</li>
+<li>March 2013, PyCon, Santa Clara</li>
+</ul>
+</section>
+<section class="slide level1">
+
+<h4 id="the-underlying-technology-container-format-libcontainer">The underlying technology Container format libcontainer</h4>
+<ul>
+<li>Namespaces
+<ul>
+<li>These namespaces provide a layer of isolation.</li>
+</ul></li>
+<li>Control groups
+<ul>
+<li>A cgroup limits an application to a specific set of resources.</li>
+</ul></li>
+<li>Union file systems
+<ul>
+<li>UnionFS, are file systems that operate by creating layers</li>
+</ul></li>
+</ul>
+</section>
+<section class="slide level1">
+
+<h4 id="an-introduction-to-docker-image">An Introduction to Docker Image</h4>
+<ul>
+<li>image
+<ul>
+<li>An image is a lightweight, stand-alone, executable package that includes everything needed to run a piece of software, including the code, a runtime, libraries, environment variables, and config files.</li>
+</ul></li>
+</ul>
+</section>
+<section class="slide level1">
+
+<h4 id="an-introduction-to-docker-container">An Introduction to Docker Container</h4>
+<ul>
+<li>container
+<ul>
+<li>A container is a runtime instance of an image – what the image becomes in memory when actually executed. It runs completely isolated from the host environment by default, only accessing host files and ports if configured to do so.</li>
+</ul></li>
+</ul>
+</section>
+<section class="slide level1">
+
+<h4 id="an-introduction-to-docker-dockerfile">An Introduction to Docker Dockerfile</h4>
+<ul>
+<li>Dockerfile
+<ul>
+<li>Dockerfile will define what goes on in the environment inside your container.</li>
+</ul></li>
+</ul>
+</section>
+<section class="slide level1">
+
+<h4 id="dockerfile">Dockerfile</h4>
+<pre><code># Use an official Python runtime as a base image
+FROM python:2.7-slim
+
+# Set the working directory to /app
+WORKDIR /app
+
+# Copy the current directory contents into the container at /app
+ADD . /app
+
+# Install any needed packages specified in requirements.txt
+RUN pip install -r requirements.txt
+
+# Make port 80 available to the world outside this container
+EXPOSE 80
+
+# Define environment variable
+ENV NAME World
+
+# Run app.py when the container launches
+CMD [&quot;python&quot;, &quot;app.py&quot;]</code></pre>
+</section>
+<section class="slide level1">
+
+<h3 id="docker-vs-vm">Docker vs VM</h3>
+<figure>
+<img src="Images/VM.PNG" />
+</figure>
+</section>
+<section class="slide level1">
+
+<h3 id="docker-vs-vm-1">Docker vs VM</h3>
+<figure>
+<img src="Images/Docker.PNG" />
+</figure>
+</section>
+    </div>
+  </div>
+
+
+  <script src="reveal.js/lib/js/head.min.js"></script>
+  <script src="reveal.js/js/reveal.js"></script>
+
+<!--Hiding navigation icons right corner-->
+<style>
+  .reveal .controls {
+    visibility: hidden;
+  }
+  .notes .reveal .controls {
+    visibility: visible;
+  }
+</style>
+<!--End hiding navigation icons right corner-->
+
+<script>
+  if (window.self !== window.top) {
+    document.body.className += " notes";
+  }
+</script>
+
+  <script>
+
+      // Full list of configuration options available here:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        controls: true,         // Display controls in the bottom right corner
+        progress: true,         // Display a presentation progress bar
+        history: true,          // Push each slide change to the browser history
+        center: false,                       // Vertical centering of slides
+        maxScale: 1.5,                  // Bounds for smallest/largest possible content scale
+        slideNumber: false,                // Display the page number of the current slide
+        theme: 'white', // available themes are in /css/theme
+        transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+        // Optional libraries used to extend on reveal.js
+        dependencies: [
+          { src: 'reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: 'reveal.js/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+          { src: 'reveal.js/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } },
+//          { src: 'reveal.js/plugin/search/search.js', async: true, condition: function() { return !!document.body.classList; }, }
+//          { src: 'reveal.js/plugin/remotes/remotes.js', async: true, condition: function() { return !!document.body.classList; } }
+]});
+    </script>
+    </body>
+</html>
