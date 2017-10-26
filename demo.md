@@ -1,9 +1,18 @@
 Search for images: docker search <PATTERN>
 	docker search nginx
+	docker search reddis
+	docker search postgres
+
+	At the top the official image
+	In the list, modified images published by others
+	Detailed can be found on Docker Hub : https://hub.docker.com/
 
 Pull images from Docker hub: 
 	docker pull nginx:latest
 	docker pull nginx:alpine
+
+List pulled images
+	docker images
 
 Run an image locally: 
 	docker run --name my-nginx-instance -p 80:80 -d nginx:latest
@@ -20,15 +29,21 @@ Stop a container
 
 View a container that is stopped
 
-	docker ps -a
+	docker ps doesn't display containers that are stopped
+	Must run docker ps -a
 
-Start am existing container
+Start an existing container
 
 	docker start <container id>
 
 Connect to a container
 	docker exec -ti <container id> bash
-	root of the terminal window changes
+	
+	Notice that the root of the terminal window changes
+
+	Tip: bash needs to be in the PATH of the container - otherwise, needs to call /bin/bash
+	Some container shell are different from bash
+	eg. Alpine container is /bin/sh
 
 Modify an image
 	eg Modify NGINX default html page
@@ -39,7 +54,7 @@ Modify an image
 	Problem: apt-get install vim does not work
 	Solution: run apt-get update first
 
-	Edit the file! Which file?
+	Edit the file! Which file? Let's figure out the default HTML file for the official nginx image
 	vim /etc/nginx/conf.d/default.conf
 
 	    location / {
@@ -60,12 +75,17 @@ Start a new instance on another port
 
 Commit changes to a new image
 
-	docker commit 7dfae149f2c8 nginx-demo:v1
+	docker commit <container id> nginx-demo:v1
+
+	Notice the v1 - I am keeping 'latest' intact and creating a new image with tag "v1"
+	Tag can be anything (foo, bar) eg. nginx:foo, nginx:bar, nginx:v1
 
 Run the new image
 
 	docker run --name docker-nginx-on-port-82 -p 82:80 -d nginx-demo:v1
 	http://localhost:82
+
+	Changes are now reflected in my new container
 
 Build an image from a base image using a Dockerfile
 
@@ -74,27 +94,19 @@ Build an image from a base image using a Dockerfile
 	explanation
 	building the container
 	docker images
-	docker build -t nginx-demo:v2 .
+	docker build -t nginx-demo:v2 . <- now it's v2
 	docker images
 	run my new image
 	docker run --name my-nginx-instance-from-dockerfile -p 83:80 -d nginx-demo:v2
 
-Build an image using docker-compose
-
-	why docker-compose?
-	docker-compose file
-	docker-compose images
-	docker-compose build -> from Dockerfile
-	docker-compose create -> create container from docker-compose.yml
-
-Run container remotely (in production?)
+Run container remotely (in production!)
 
 	I've run my container locally and tested that my code works
 	Now what?
 
-	Let's make it available via my private registry and try to run it on a Docker cluster (in AWS for example :-) )
-
-	Problem: my new image is only available locally and I don't want to have to re-do everything again remotely
+	Problem: my new image is only available locally and I don't want to have to re-build all images with my changes everything again remotely
+	Solution 1: I can commit my Dockerfile or docker-compose.yml to Git (Stash/BitBucket) and build the container on my new host - not ideal
+	Solution 2: Let's make it available via my private registry and try to run it on a Docker cluster (in AWS for example :-) ) - preferred
 
 Push docker container to a private registry
 
@@ -110,11 +122,11 @@ Push docker container to a private registry
 		
 	Tag my image
 
-		docker tag nginx-demo:v2 996389529590.dkr.ecr.eu-west-1.amazonaws.com/nginx-demo:v2
+		docker tag nginx-demo:v2 996389529590.dkr.ecr.eu-west-1.amazonaws.com/nginx-demo-new:v2
 
 	Push my image
 
-		docker push 996389529590.dkr.ecr.eu-west-1.amazonaws.com/nginx-demo:v2
+		docker push 996389529590.dkr.ecr.eu-west-1.amazonaws.com/nginx-demo-new:v2
 
 	Now my image is available from everywhere where I can log in
 
@@ -122,24 +134,37 @@ Run container on a cluster with node name as variable displayed on the HTML page
 
 	Demo: run containers on ECS
 
-Tips
+	Login:
+	docker login ...
 
-	Keeping it light
-		Big containers take time to instantiate
+	docker pull 996389529590.dkr.ecr.eu-west-1.amazonaws.com/nginx-demo-new:v2
 
-	Keeping it simple to a single function
+	docker run --name docker-nginx-on-my-ecs-cluster -p 8080:80 -d 996389529590.dkr.ecr.eu-west-1.amazonaws.com/nginx-demo-new:v2
 
-	Keeping it managed by a single team
+	If I run docker run --name docker-nginx-on-my-ecs-cluster -p 8080:80 -d nginx-demo-new:v2
+		My image gets pulled from Docker Hub and it will fail because nginx-demo-new:v2 doesn't exist in Docker Hub
 
-	The importance of tagging your container with the latest version
-		when using Kubernetes, Swarm, Mesos, Marathon etc.
-		if containers dies or autoscale, it will put the version that is configured
-		if always using latest, risk of having different version running on different containers
-
-	Demo: using latest for different containers instances when changes are being committed to the new version
+	Verify that I am running different OS version:
+	 on host: cat /etc/*release
+	 on container: docker exec -ti <container id> bash then cat /etc/*release
 
 
-Latest news
 
-	Docker now support Kubernetes in addition to Docker Swarm (announced at DockerCon in Copenhagen 3 weeks ago)
-	
+	Demo: using latest for different containers instances when changes are being committed to the same version
+
+
+
+Bonus: build a voting application based on Python, Redis, Node.js and PostgreSQL using docker-compose
+
+	why docker-compose? A service is usually made of multiple components (front-end, app, logic, db that are linked to each other)
+	docker-compose file
+	docker-compose images
+	docker-compose build -> from Dockerfile
+	docker-compose create -> create container from docker-compose.yml
+
+	https://github.com/dockersamples/example-voting-app
+	git clone git@github.com:dockersamples/example-voting-app.git
+	docker-compose up
+
+	Connect to blablabla and vote if you prefer cats or dogs!
+
